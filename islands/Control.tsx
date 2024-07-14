@@ -16,7 +16,7 @@ const is_updating = signal (false)
 
 const update = () => {
    const payload = {
-      is_playing: false,
+      is_playing: is_playing.value,
       values: v.map (v => v.value)
    }
    const json = JSON.stringify (payload)
