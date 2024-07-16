@@ -4,6 +4,7 @@ import { Signal, signal } from "@preact/signals"
 import Knob from "./Knob.tsx"
 import IsPlayingIndicator from "./IsPlayingIndicator.tsx"
 import { UpdateMessage } from "../components/UpdateMessage.tsx"
+import { ParameterIndicator } from "./ParameterIndicator.tsx";
 
 const v: Signal <number> [] = []
 
@@ -13,6 +14,11 @@ for (let i = 0; i < 24; i++) {
 
 const is_playing = signal (false)
 const is_updating = signal (false)
+const param_change = signal (false)
+const param_control = signal (0)
+const param_value = signal (0)
+
+let param_change_id = 0
 
 const update = () => {
    const payload = {
@@ -90,6 +96,11 @@ export default function Control () {
          const [status, control, value] = e.data as Uint8Array
          if (status === 176) {
             v[control - 8].value = Number (value)
+            param_change.value = true
+            param_control.value = control
+            param_value.value = value
+            clearTimeout (param_change_id)
+            param_change_id = setTimeout (() => param_change.value = false, 1500)
          }
       }
 
@@ -112,6 +123,11 @@ export default function Control () {
 
 
    return <>
+      <ParameterIndicator 
+         control={ param_control.value } 
+         value={ param_value.value } 
+         values={ v.map (v => v.value) } 
+         is_visible={ param_change.value } />
       <IsPlayingIndicator 
          size={ 60 }
          position={{ x: globalThis.innerWidth - 80, y: 20 }}

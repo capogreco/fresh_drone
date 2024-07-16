@@ -23,8 +23,9 @@ export function UpdateMessage (props: {
          position: fixed;
          width: 100vw;
          color: white;
-         z-index: 1;"
-      >UPDATING</div>
+         z-index: 1;
+         top: 20px;"
+      >PARAMETER CHANGE</div>
    );
  }
  

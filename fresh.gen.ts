@@ -9,6 +9,7 @@ import * as $index from "./routes/index.tsx";
 import * as $Control from "./islands/Control.tsx";
 import * as $IsPlayingIndicator from "./islands/IsPlayingIndicator.tsx";
 import * as $Knob from "./islands/Knob.tsx";
+import * as $ParameterIndicator from "./islands/ParameterIndicator.tsx";
 import * as $Synth from "./islands/Synth.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
@@ -23,6 +24,7 @@ const manifest = {
     "./islands/Control.tsx": $Control,
     "./islands/IsPlayingIndicator.tsx": $IsPlayingIndicator,
     "./islands/Knob.tsx": $Knob,
+    "./islands/ParameterIndicator.tsx": $ParameterIndicator,
     "./islands/Synth.tsx": $Synth,
   },
   baseUrl: import.meta.url,

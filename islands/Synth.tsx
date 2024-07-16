@@ -20,16 +20,12 @@ const midi_to_freq = (midi: number) => {
    return 440 * Math.pow (2, (midi - 69) / 12)
 }
 
-const update_graph = () => {
+const random_bi = () => {
+   return Math.random () * 2 - 1
+}
 
-   let is_populated = true
-   Object.keys (a).forEach (key => {
-      const node_key = key as keyof typeof a
-      if (a[node_key] === undefined) {
-         is_populated = false
-     }
-   })
-   if (!is_populated) return
+const update_graph = () => {
+   const lag_time = Math.pow (program.values[15] / 127, 6) * 40
 
    if (a.ctx === undefined) return
    const t = a.ctx.currentTime
@@ -38,19 +34,24 @@ const update_graph = () => {
    if (!program.is_playing) {
       a.amp.gain.cancelScheduledValues (t)
       a.amp.gain.setValueAtTime (a.amp.gain.value, t)
-      a.amp.gain.exponentialRampToValueAtTime (0.001, t + 0.02)
-      a.amp.gain.linearRampToValueAtTime (0, t + 0.02 + 0.02)
+      a.amp.gain.exponentialRampToValueAtTime (0.001, t + lag_time)
+      a.amp.gain.linearRampToValueAtTime (0, t + lag_time + 0.02)
       return
    }
 
    if (a.osc === undefined) return
    a.osc.frequency.cancelScheduledValues (t)
    a.osc.frequency.setValueAtTime (a.osc.frequency.value, t)
-   a.osc.frequency.exponentialRampToValueAtTime (midi_to_freq (program.values[0]), t + 0.02)
 
+   const fine_tune = program.values[8] * 0.0157480315 - 1
+   const detune = random_bi () * program.values[16] / 127
+   const freq = midi_to_freq (program.values[0] + fine_tune + detune)
+   a.osc.frequency.exponentialRampToValueAtTime (freq, t + lag_time)
+
+   const vol = program.values[7] / 127
    a.amp.gain.cancelScheduledValues (t)
    a.amp.gain.setValueAtTime (a.amp.gain.value, t)
-   a.amp.gain.linearRampToValueAtTime (program.values[7] / 127, t + 0.02)
+   a.amp.gain.linearRampToValueAtTime (vol, t + lag_time)
 
 }
 
