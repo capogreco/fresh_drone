@@ -25,7 +25,7 @@ const random_bi = () => {
 }
 
 const update_graph = () => {
-   const lag_time = Math.pow (program.values[15] / 127, 6) * 40
+   const lag_time = Math.pow (program.values[15] / 127, 3) * 40
 
    if (a.ctx === undefined) return
    const t = a.ctx.currentTime
@@ -44,7 +44,7 @@ const update_graph = () => {
    a.osc.frequency.setValueAtTime (a.osc.frequency.value, t)
 
    const fine_tune = program.values[8] * 0.0157480315 - 1
-   const detune = random_bi () * program.values[16] / 127
+   const detune = random_bi () * program.values[16] / 128
    const freq = midi_to_freq (program.values[0] + fine_tune + detune)
    a.osc.frequency.exponentialRampToValueAtTime (freq, t + lag_time)
 

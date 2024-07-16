@@ -8,7 +8,7 @@ export function UpdateMessage (props: {
    
    useEffect (() => {
       if (!div.current) return
-      div.current.style.top = `${ globalThis.innerHeight  - 100}px`
+      div.current.style.top = `${ globalThis.innerHeight  - 60}px`
 
       div.current.style.display = is_visible ? `flex` : `none`
    }, [ is_visible ])
@@ -16,16 +16,15 @@ export function UpdateMessage (props: {
 
    return (
       <div ref={ div } style="
-         font: italic bolder 80px sans-serif;
+         font: italic bolder 40px sans-serif;
          justify-content: center;
          align-items: center;
          user-select: none;
          position: fixed;
          width: 100vw;
          color: white;
-         z-index: 1;
-         top: 20px;"
-      >PARAMETER CHANGE</div>
+         z-index: 1;"
+      >UPDATING</div>
    );
  }
  

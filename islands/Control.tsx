@@ -2,7 +2,7 @@
 import { useEffect } from "preact/hooks"
 import { Signal, signal } from "@preact/signals"
 import Knob from "./Knob.tsx"
-import IsPlayingIndicator from "./IsPlayingIndicator.tsx"
+import IsPlayingIndicator from "../components/IsPlayingIndicator.tsx"
 import { UpdateMessage } from "../components/UpdateMessage.tsx"
 import { ParameterIndicator } from "./ParameterIndicator.tsx";
 
@@ -15,7 +15,7 @@ for (let i = 0; i < 24; i++) {
 const is_playing = signal (false)
 const is_updating = signal (false)
 const param_change = signal (false)
-const param_control = signal (0)
+const param_control = signal (8)
 const param_value = signal (0)
 
 let param_change_id = 0
@@ -126,7 +126,7 @@ export default function Control () {
       <ParameterIndicator 
          control={ param_control.value } 
          value={ param_value.value } 
-         values={ v.map (v => v.value) } 
+         // values={ v.map (v => v.value) } 
          is_visible={ param_change.value } />
       <IsPlayingIndicator 
          size={ 60 }
