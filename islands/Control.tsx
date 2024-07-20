@@ -1,10 +1,10 @@
 // import ControlInterface from "../components/ControlInterface.tsx"
 import { useEffect } from "preact/hooks"
 import { Signal, signal } from "@preact/signals"
-import Knob from "./Knob.tsx"
+import Knob from "../components/Knob.tsx"
 import IsPlayingIndicator from "../components/IsPlayingIndicator.tsx"
 import { UpdateMessage } from "../components/UpdateMessage.tsx"
-import { ParameterIndicator } from "./ParameterIndicator.tsx";
+import { ParameterIndicator } from "../components/ParameterIndicator.tsx";
 
 const v: Signal <number> [] = []
 

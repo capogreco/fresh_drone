@@ -12,7 +12,7 @@ export function SynthScreen (){
          height: 100vh;
          left: 0;
          top: 0;"
-      ></div>
+      ></div>      
    );
 }
  

@@ -21,6 +21,10 @@ export function ParameterIndicator (props: {
       16: (v: number) => `finetune: ${ (v * 2 / 128 - 1).toFixed (2) }`,
       24: (v: number) => `detune: ${ (v / 127).toFixed (2) }`,
 
+      // reverb
+      14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,
+      22: (v: number) => `reverb amount: ${ (v / 127).toFixed (2) }`,
+
       // global
       15: (v: number) => `volume: ${ (v / 127).toFixed (2) }`,
       23: (v: number) => `lag: ${ (Math.pow (v / 127, 3) * 40).toFixed (2) }s`,
@@ -28,9 +32,11 @@ export function ParameterIndicator (props: {
    }
 
    const is_handleable = control in handler
-   if (!is_handleable) return null
+   
 
-   const msg = handler[control](value)
+   const msg = is_handleable 
+      ? handler[control](value) 
+      : `cc ${ control } : ${ value }`
    
    const div = useRef <HTMLDivElement> (null)
    

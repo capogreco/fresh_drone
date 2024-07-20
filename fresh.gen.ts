@@ -7,8 +7,6 @@ import * as $api_update from "./routes/api/update.ts";
 import * as $ctrl from "./routes/ctrl.tsx";
 import * as $index from "./routes/index.tsx";
 import * as $Control from "./islands/Control.tsx";
-import * as $Knob from "./islands/Knob.tsx";
-import * as $ParameterIndicator from "./islands/ParameterIndicator.tsx";
 import * as $Synth from "./islands/Synth.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
@@ -21,8 +19,6 @@ const manifest = {
   },
   islands: {
     "./islands/Control.tsx": $Control,
-    "./islands/Knob.tsx": $Knob,
-    "./islands/ParameterIndicator.tsx": $ParameterIndicator,
     "./islands/Synth.tsx": $Synth,
   },
   baseUrl: import.meta.url,
