@@ -43,8 +43,9 @@ export function ParameterIndicator (props: {
       },
 
       // reverb
-      14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,
+      // 14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,
       22: (v: number) => `reverb amount: ${ (v / 127).toFixed (2) }`,
+      30: (v: number) => `reverb diversity: ${ (v / 127).toFixed (2) }`,
 
       // global
       15: (v: number) => `volume: ${ (v / 127).toFixed (2) }`,

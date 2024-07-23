@@ -34,7 +34,9 @@ const rand_element = (array: number []) => {
 }
 
 const update_graph = () => {
-   const lag_time = Math.pow (program.values[15] / 127, 3) * 40
+   const lag_diversity = program.values[23] / 127
+   const lag = Math.pow (program.values[15] / 127, 3) * 40
+   const lag_time = lag * Math.pow (2, lag_diversity * random_bi ())
 
    if (a.ctx === undefined) return
    const t = a.ctx.currentTime
@@ -60,14 +62,6 @@ const update_graph = () => {
    const den = Math.floor (program.values[9] * 11 / 127) + 1 // [1, 12]
    const unity = program.values[17] / 128 // [0, 1)
 
-   // const num_min = Math.floor (unity * num) + 1 // [1, 12]
-   // const num_array = []
-   // for (let i = num_min; i <= num; i++) num_array.push (i)
-
-   // const den_min = Math.floor (unity * den) + 1
-   // const den_array = []
-   // for (let i = den_min; i <= den; i++) den_array.push (i)
-
    const [ num_array, den_array ] = siq_gen (num, den, unity)
 
    console.log (num_array, den_array)
@@ -82,7 +76,10 @@ const update_graph = () => {
    a.amp.gain.linearRampToValueAtTime (vol, t + lag_time)
 
    if (a.rev === undefined || a.wet === undefined) return
-   const rev_vol = program.values[14] / 127
+
+   const rev_diversity = 1 - (Math.random () * program.values[22] / 127)
+
+   const rev_vol = program.values[14] * rev_diversity / 127
    a.wet.gain.cancelScheduledValues (t)
    a.wet.gain.setValueAtTime (a.wet.gain.value, t)
    a.wet.gain.linearRampToValueAtTime (rev_vol, t + lag_time)
