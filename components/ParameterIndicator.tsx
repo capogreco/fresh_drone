@@ -63,10 +63,11 @@ export function ParameterIndicator (props: {
             <br />[ { den.join (`, `) } ] 
          </div>
       },
-
+      
       // tremolo
-      10: (v: number) => `tremolo: ${ (v / 127).toFixed (2) }`,
-
+      10: (v: number) => `tremolo dapth: ${ (v / 127).toFixed (2) }`,
+      18: (v: number) => `tremolo rate: ${ (0.05 * Math.pow (320, v / 127)).toFixed (2) }`,
+      26: (v: number) => `tremolo diversity: ${ (v / 127).toFixed (2) }`,
       // reverb
       // 14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,
       22: (v: number) => `reverb amount: ${ (v / 127).toFixed (2) }`,

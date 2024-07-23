@@ -69,8 +69,6 @@ const update_graph = () => {
 
    const [ num_array, den_array ] = siq_gen (num, den, unity)
 
-   console.log (num_array, den_array)
-
    const rel = rand_element (num_array) / rand_element (den_array)
 
    a.osc.frequency.exponentialRampToValueAtTime (freq * rel, t + lag_time)
@@ -85,12 +83,16 @@ const update_graph = () => {
    a.tremolo.off.offset.linearRampToValueAtTime (1 - trem_val, t + lag_time)
    a.tremolo.wid.gain.linearRampToValueAtTime (trem_val, t + lag_time)
 
+   const rand_int = (m: number) => Math.floor (Math.random () * m) + 1
+
+   const trem_div = program.values[18] / 127
+   const trem_mul = rand_int (trem_div * 6) / rand_int (trem_div * 6)
+
    if (a.tremolo.osc === undefined) return
    const trem_freq = 0.05 * Math.pow (320, program.values[10] / 127)
-   console.log (trem_freq)
    a.tremolo.osc.frequency.cancelScheduledValues (t)
    a.tremolo.osc.frequency.setValueAtTime (a.tremolo.osc.frequency.value, t)
-   a.tremolo.osc.frequency.exponentialRampToValueAtTime (trem_freq, t + lag_time)
+   a.tremolo.osc.frequency.exponentialRampToValueAtTime (trem_freq * trem_mul, t + lag_time)
 
    const vol = program.values[7] / 127
    a.amp.gain.cancelScheduledValues (t)
