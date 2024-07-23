@@ -29,6 +29,6 @@ jobs:
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "fresh-drone"
+          project: "capo-greco-fresh-drone-14"
           entrypoint: "main.ts"
           root: "."
