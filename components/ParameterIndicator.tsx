@@ -50,21 +50,22 @@ export function ParameterIndicator (props: {
             <br />[ { den.join (`, `) } ] 
          </div>
       },
-      25: (v: number) => {
-         // const num = Math.floor (program.values[1] * 11 / 127) + 1 // [1, 12]
-         // const den = Math.floor (program.values[9] * 11 / 127) + 1 // [1, 12]
-         // const unity = program.values[17] / 128 // [0, 1)
-      
+      25: (v: number) => {      
          const num_max = Math.floor (values[1] * 11 / 127) + 1 
          const den_max = Math.floor (values[9] * 11 / 127) + 1
          const unity = v / 128
+
          const [ num, den ] = siq_gen (num_max, den_max, unity)
+
          return <div>
             unity: { unity.toFixed (2) }
             <br />[ { num.join (`, `) } ] 
             <br />[ { den.join (`, `) } ] 
          </div>
       },
+
+      // tremolo
+      10: (v: number) => `tremolo: ${ (v / 127).toFixed (2) }`,
 
       // reverb
       // 14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,

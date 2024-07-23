@@ -78,13 +78,19 @@ const update_graph = () => {
    if (a.tremolo.off === undefined ) return
    if (a.tremolo.wid === undefined) return
    const trem_val = program.values[2] / 254
-   console.log (trem_val)
    a.tremolo.off.offset.cancelScheduledValues (t)
    a.tremolo.wid.gain.cancelScheduledValues (t)
    a.tremolo.off.offset.setValueAtTime (a.tremolo.off.offset.value, t)
    a.tremolo.wid.gain.setValueAtTime (a.tremolo.wid.gain.value, t)
    a.tremolo.off.offset.linearRampToValueAtTime (1 - trem_val, t + lag_time)
    a.tremolo.wid.gain.linearRampToValueAtTime (trem_val, t + lag_time)
+
+   if (a.tremolo.osc === undefined) return
+   const trem_freq = 0.05 * Math.pow (320, program.values[10] / 127)
+   console.log (trem_freq)
+   a.tremolo.osc.frequency.cancelScheduledValues (t)
+   a.tremolo.osc.frequency.setValueAtTime (a.tremolo.osc.frequency.value, t)
+   a.tremolo.osc.frequency.exponentialRampToValueAtTime (trem_freq, t + lag_time)
 
    const vol = program.values[7] / 127
    a.amp.gain.cancelScheduledValues (t)
