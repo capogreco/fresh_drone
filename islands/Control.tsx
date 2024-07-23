@@ -126,7 +126,7 @@ export default function Control () {
       <ParameterIndicator 
          control={ param_control.value } 
          value={ param_value.value } 
-         // values={ v.map (v => v.value) } 
+         values={ v.map (v => v.value) } 
          is_visible={ param_change.value } />
       <IsPlayingIndicator 
          size={ 60 }

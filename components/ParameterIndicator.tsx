@@ -1,4 +1,6 @@
 import { useRef, useEffect } from "preact/hooks"
+import { siq_gen } from "../shared/siq_gen.ts"
+import { JSX } from "preact/jsx-runtime";
 
 const note_to_name = (note: number) => {
    const notes = `C -C#-D -D#-E -F -F#-G -G#-A -A#-B `.split (`-`)
@@ -10,16 +12,35 @@ const note_to_name = (note: number) => {
 export function ParameterIndicator (props: {
    control: number,
    value: number,
-   // values: number [],
+   values: number [],
    is_visible: boolean,
 }){
-   const { control, value, is_visible } = props
+   const { control, value, values, is_visible } = props
 
-   const handler: { [key: number]: (v: number) => string } = {
+   const handler: { [key: number]: (v: number) => string | JSX.Element  } = {
       // root
       8: (v: number) => `note: ${ note_to_name (v) }`,
       16: (v: number) => `finetune: ${ (v * 2 / 128 - 1).toFixed (2) }`,
       24: (v: number) => `detune: ${ (v / 127).toFixed (2) }`,
+
+      // harmonic
+      9: (v: number) => `numerator: ${ Math.floor (v * 11 / 127) + 1 }`,
+      17: (v: number) => `denominator: ${ Math.floor (v * 11 / 127) + 1 }`,
+      25: (v: number) => {
+         // const num = Math.floor (program.values[1] * 11 / 127) + 1 // [1, 12]
+         // const den = Math.floor (program.values[9] * 11 / 127) + 1 // [1, 12]
+         // const unity = program.values[17] / 128 // [0, 1)
+      
+         const num_max = Math.floor (values[1] * 11 / 127) + 1 
+         const den_max = Math.floor (values[9] * 11 / 127) + 1
+         const unity = v / 128
+         const [ num, den ] = siq_gen (num_max, den_max, unity)
+         return <div>
+            unity: { unity.toFixed (2) }
+            <br />[ { num.join (`, `) } ] 
+            <br />[ { den.join (`, `) } ] 
+         </div>
+      },
 
       // reverb
       14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,

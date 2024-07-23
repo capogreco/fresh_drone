@@ -3,6 +3,7 @@ import { useEffect } from "preact/hooks"
 import { SynthSplash } from "../components/SynthSplash.tsx"
 import { SynthScreen } from "../components/SynthScreen.tsx"
 import { Program } from "../shared/types.ts"
+import { siq_gen } from "../shared/siq_gen.ts"
 
 const a = {
    ctx: undefined as AudioContext | undefined,
@@ -58,17 +59,18 @@ const update_graph = () => {
    const num = Math.floor (program.values[1] * 11 / 127) + 1 // [1, 12]
    const den = Math.floor (program.values[9] * 11 / 127) + 1 // [1, 12]
    const unity = program.values[17] / 128 // [0, 1)
-   
-   const num_min = Math.floor (unity * num) + 1 // [1, 12]
-   const num_array = []
-   for (let i = num_min; i <= num; i++) num_array.push (i)
-   // console.log (`num: ${ num } // den: ${ den } // unity: ${ unity }`)
-   // console.log (num_min, num_array)
 
-   const den_min = Math.floor (unity * den) + 1
-   const den_array = []
-   for (let i = den_min; i <= den; i++) den_array.push (i)
-   // console.log (den_min, den_array)
+   // const num_min = Math.floor (unity * num) + 1 // [1, 12]
+   // const num_array = []
+   // for (let i = num_min; i <= num; i++) num_array.push (i)
+
+   // const den_min = Math.floor (unity * den) + 1
+   // const den_array = []
+   // for (let i = den_min; i <= den; i++) den_array.push (i)
+
+   const [ num_array, den_array ] = siq_gen (num, den, unity)
+
+   console.log (num_array, den_array)
 
    const rel = rand_element (num_array) / rand_element (den_array)
 
