@@ -4,6 +4,7 @@ import { SynthSplash } from "../components/SynthSplash.tsx"
 import { SynthScreen } from "../components/SynthScreen.tsx"
 import { Program } from "../shared/types.ts"
 import { siq_gen } from "../shared/siq_gen.ts"
+import { CHAR_0 } from "$std/path/_common/constants.ts";
 
 const a = {
    ctx: undefined as AudioContext | undefined,
@@ -11,8 +12,12 @@ const a = {
    amp: undefined as GainNode | undefined,
    rev: undefined as ConvolverNode | undefined,
    wet: undefined as GainNode | undefined,
-   del: undefined as DelayNode | undefined,
-   fbk: undefined as GainNode | undefined,
+   tremolo: {
+      osc: undefined as OscillatorNode | undefined,
+      off: undefined as ConstantSourceNode | undefined,
+      wid: undefined as GainNode | undefined,
+      amp: undefined as GainNode | undefined,
+   },
 }
 
 const program = {
@@ -70,6 +75,17 @@ const update_graph = () => {
 
    a.osc.frequency.exponentialRampToValueAtTime (freq * rel, t + lag_time)
 
+   if (a.tremolo.off === undefined ) return
+   if (a.tremolo.wid === undefined) return
+   const trem_val = program.values[2] / 254
+   console.log (trem_val)
+   a.tremolo.off.offset.cancelScheduledValues (t)
+   a.tremolo.wid.gain.cancelScheduledValues (t)
+   a.tremolo.off.offset.setValueAtTime (a.tremolo.off.offset.value, t)
+   a.tremolo.wid.gain.setValueAtTime (a.tremolo.wid.gain.value, t)
+   a.tremolo.off.offset.linearRampToValueAtTime (1 - trem_val, t + lag_time)
+   a.tremolo.wid.gain.linearRampToValueAtTime (trem_val, t + lag_time)
+
    const vol = program.values[7] / 127
    a.amp.gain.cancelScheduledValues (t)
    a.amp.gain.setValueAtTime (a.amp.gain.value, t)
@@ -83,13 +99,6 @@ const update_graph = () => {
    a.wet.gain.cancelScheduledValues (t)
    a.wet.gain.setValueAtTime (a.wet.gain.value, t)
    a.wet.gain.linearRampToValueAtTime (rev_vol, t + lag_time)
-
-   if (a.del === undefined || a.fbk === undefined) return
-   const rev_fbk = program.values[6] / 127
-   a.fbk.gain.cancelScheduledValues (t)
-   a.fbk.gain.setValueAtTime (a.fbk.gain.value, t)
-   a.fbk.gain.linearRampToValueAtTime (rev_fbk, t + lag_time)
-
 
 }
 
@@ -110,7 +119,6 @@ export default function Synth (props: {
          if (program.versionstamp === `init` 
             || data.versionstamp > program.versionstamp) {
             Object.assign (program, data)
-            // console.log (program.values, program.is_playing)
             update_graph ()
          }
       }
@@ -128,9 +136,29 @@ export default function Synth (props: {
       a.osc.frequency.value = 40000
       a.osc.start ()
 
+      a.tremolo.osc = a.ctx.createOscillator ()
+      a.tremolo.osc.frequency.value = 1
+      a.tremolo.osc.start ()
+
+      a.tremolo.wid = a.ctx.createGain ()
+      a.tremolo.wid.gain.value = 0
+
+      a.tremolo.amp = a.ctx.createGain ()
+      a.tremolo.amp.gain.value = 0
+      a.tremolo.osc
+         .connect (a.tremolo.wid)
+         .connect (a.tremolo.amp.gain)
+
+      a.tremolo.off = a.ctx.createConstantSource ()
+      a.tremolo.off.offset.value = 1
+      a.tremolo.off.connect (a.tremolo.amp.gain)
+      a.tremolo.off.start ()   
+   
       a.amp = a.ctx.createGain ()
       a.amp.gain.value = 0
-      a.osc.connect (a.amp).connect (a.ctx.destination)
+      a.osc.connect (a.tremolo.amp)
+         .connect (a.amp)
+         .connect (a.ctx.destination)
 
       a.rev = a.ctx.createConvolver ()
       const response = await fetch (`R1NuclearReactorHall.m4a`)
@@ -143,15 +171,6 @@ export default function Synth (props: {
       a.amp.connect (a.wet)
          .connect (a.rev)
          .connect (a.ctx.destination)
-
-      a.del = a.ctx.createDelay ()
-      a.del.delayTime.value = 0
-      a.fbk = a.ctx.createGain ()
-      a.fbk.gain.value = 0
-
-      a.wet.connect (a.del)
-         .connect (a.fbk)
-         .connect (a.wet)
          
       enabled.value = true
       console.log (`Audio Context is`, a.ctx.state)

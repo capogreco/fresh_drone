@@ -24,8 +24,32 @@ export function ParameterIndicator (props: {
       24: (v: number) => `detune: ${ (v / 127).toFixed (2) }`,
 
       // harmonic
-      9: (v: number) => `numerator: ${ Math.floor (v * 11 / 127) + 1 }`,
-      17: (v: number) => `denominator: ${ Math.floor (v * 11 / 127) + 1 }`,
+      9: (v: number) => {
+         const num_max = Math.floor (v * 11 / 127) + 1 
+         const den_max = Math.floor (values[9] * 11 / 127) + 1
+         const unity = values[17] / 128
+
+         const [ num, den ] = siq_gen (num_max, den_max, unity)
+
+         return <div>
+            numerator:  { num_max }
+            <br />[ { num.join (`, `) } ] 
+            <br />[ { den.join (`, `) } ] 
+         </div>
+      },
+      17: (v: number) => {
+         const num_max = Math.floor (values[1] * 11 / 127) + 1 
+         const den_max = Math.floor (v * 11 / 127) + 1
+         const unity = values[17] / 128
+
+         const [ num, den ] = siq_gen (num_max, den_max, unity)
+
+         return <div>
+            denominator: { den_max }
+            <br />[ { num.join (`, `) } ] 
+            <br />[ { den.join (`, `) } ] 
+         </div>
+      },
       25: (v: number) => {
          // const num = Math.floor (program.values[1] * 11 / 127) + 1 // [1, 12]
          // const den = Math.floor (program.values[9] * 11 / 127) + 1 // [1, 12]
