@@ -4,7 +4,8 @@ import { SynthSplash } from "../components/SynthSplash.tsx"
 import { SynthScreen } from "../components/SynthScreen.tsx"
 import { Program } from "../shared/types.ts"
 import { siq_gen } from "../shared/siq_gen.ts"
-import { CHAR_0 } from "$std/path/_common/constants.ts";
+
+const rand_int = (m: number) => Math.floor (Math.random () * m) + 1
 
 const a = {
    ctx: undefined as AudioContext | undefined,
@@ -17,6 +18,10 @@ const a = {
       off: undefined as ConstantSourceNode | undefined,
       wid: undefined as GainNode | undefined,
       amp: undefined as GainNode | undefined,
+   },
+   vibrato: {
+      osc: undefined as OscillatorNode | undefined,
+      wid: undefined as GainNode | undefined,
    },
 }
 
@@ -69,9 +74,24 @@ const update_graph = () => {
 
    const [ num_array, den_array ] = siq_gen (num, den, unity)
 
-   const rel = rand_element (num_array) / rand_element (den_array)
+   const harm = freq * rand_element (num_array) / rand_element (den_array)
+   a.osc.frequency.exponentialRampToValueAtTime (harm, t + lag_time)
 
-   a.osc.frequency.exponentialRampToValueAtTime (freq * rel, t + lag_time)
+   if (a.vibrato.wid === undefined) return
+   const vib_wid = Math.pow (program.values[3] / 127, 4) * harm * 0.5
+   a.vibrato.wid.gain.cancelScheduledValues (t)
+   a.vibrato.wid.gain.setValueAtTime (a.vibrato.wid.gain.value, t)
+   a.vibrato.wid.gain.linearRampToValueAtTime (vib_wid, t + lag_time)
+
+   if (a.vibrato.osc === undefined) return
+   const vib_freq = 0.05 * Math.pow (320, program.values[11] / 127)
+   const vib_div = program.values[19] / 127
+   const vib_mul = rand_int (vib_div * 6) / rand_int (vib_div * 6)
+
+   a.vibrato.osc.frequency.cancelScheduledValues (t)
+   a.vibrato.osc.frequency.setValueAtTime (a.vibrato.osc.frequency.value, t)
+   a.vibrato.osc.frequency.exponentialRampToValueAtTime (vib_freq * vib_mul, t + lag_time)
+
 
    if (a.tremolo.off === undefined ) return
    if (a.tremolo.wid === undefined) return
@@ -83,7 +103,6 @@ const update_graph = () => {
    a.tremolo.off.offset.linearRampToValueAtTime (1 - trem_val, t + lag_time)
    a.tremolo.wid.gain.linearRampToValueAtTime (trem_val, t + lag_time)
 
-   const rand_int = (m: number) => Math.floor (Math.random () * m) + 1
 
    const trem_div = program.values[18] / 127
    const trem_mul = rand_int (trem_div * 6) / rand_int (trem_div * 6)
@@ -143,6 +162,16 @@ export default function Synth (props: {
       a.osc = a.ctx.createOscillator ()
       a.osc.frequency.value = 40000
       a.osc.start ()
+
+      a.vibrato.osc = a.ctx.createOscillator ()
+      a.vibrato.osc.frequency.value = 1
+      a.vibrato.osc.start ()
+
+      a.vibrato.wid = a.ctx.createGain ()
+      a.vibrato.wid.gain.value = 0
+
+      a.vibrato.osc.connect (a.vibrato.wid)
+         .connect (a.osc.frequency)
 
       a.tremolo.osc = a.ctx.createOscillator ()
       a.tremolo.osc.frequency.value = 1

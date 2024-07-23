@@ -65,9 +65,15 @@ export function ParameterIndicator (props: {
       },
       
       // tremolo
-      10: (v: number) => `tremolo dapth: ${ (v / 127).toFixed (2) }`,
+      10: (v: number) => `tremolo depth: ${ (v / 127).toFixed (2) }`,
       18: (v: number) => `tremolo rate: ${ (0.05 * Math.pow (320, v / 127)).toFixed (2) }`,
       26: (v: number) => `tremolo diversity: ${ (v / 127).toFixed (2) }`,
+
+      // vibrato
+      11: (v: number) => `vibrato depth: ${ (v / 127).toFixed (2) }`,
+      19: (v: number) => `vibrato rate: ${ (0.05 * Math.pow (320, v / 127)).toFixed (2) }`,
+      27: (v: number) => `vibrato diversity: ${ (v / 127).toFixed (2) }`,
+
       // reverb
       // 14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,
       22: (v: number) => `reverb amount: ${ (v / 127).toFixed (2) }`,
