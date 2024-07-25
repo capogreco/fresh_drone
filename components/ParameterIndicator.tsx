@@ -78,7 +78,7 @@ export function ParameterIndicator (props: {
       12: (v: number) => {
          const num_max = Math.floor (v * 11 / 127) + 1 
          const den_max = Math.floor (values[12] * 11 / 127) + 1
-         const unity = values[17] / 128
+         const unity = values[20] / 128
 
          const [ num, den ] = siq_gen (num_max, den_max, unity)
 
@@ -91,7 +91,7 @@ export function ParameterIndicator (props: {
       20: (v: number) => {
          const num_max = Math.floor (values[4] * 11 / 127) + 1 
          const den_max = Math.floor (v * 11 / 127) + 1
-         const unity = values[17] / 128
+         const unity = values[20] / 128
 
          const [ num, den ] = siq_gen (num_max, den_max, unity)
 
@@ -114,6 +114,10 @@ export function ParameterIndicator (props: {
             <br />[ { den.join (`, `) } ] 
          </div>
       },
+
+      13: (v: number) => `timbre damping: ${ (v / 127).toFixed (2) }`,
+      21: (v: number) => `timbre amount: ${ (v / 127).toFixed (2) }`,
+      29: (v: number) => `timbre diversity: ${ (v / 127).toFixed (2) }`,
 
       // reverb
       // 14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,

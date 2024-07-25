@@ -100,6 +100,10 @@ const update_graph = () => {
 
    let t_harm = harm
 
+   const t_dmp = program.values[5] / 127
+   const t_amt = program.values[13] / 127
+   const t_div = Math.random () * program.values[21] / 127
+
    for (let i = 0; i < 6; i++) {
       if (a.timbre[i].osc === undefined) return
       a.timbre[i].osc!.frequency.cancelScheduledValues (t)
@@ -117,7 +121,8 @@ const update_graph = () => {
       if (a.timbre[i].amp === undefined) return
       a.timbre[i].amp!.gain.cancelScheduledValues (t)
       a.timbre[i].amp!.gain.setValueAtTime (a.timbre[i].amp!.gain.value, t)
-      a.timbre[i].amp!.gain.linearRampToValueAtTime (t_harm / (i + 1), t + lag_time)
+      const t_vol = t_harm * t_amt * (1 - t_div) / ((i * t_dmp) + 1)
+      a.timbre[i].amp!.gain.linearRampToValueAtTime (t_vol, t + lag_time)
    }
 
    if (a.tremolo.off === undefined ) return
