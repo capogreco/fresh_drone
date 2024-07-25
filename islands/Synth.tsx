@@ -7,6 +7,11 @@ import { siq_gen } from "../shared/siq_gen.ts"
 
 const rand_int = (m: number) => Math.floor (Math.random () * m) + 1
 
+interface Operator {
+   osc: OscillatorNode | undefined
+   amp: GainNode | undefined
+}
+
 const a = {
    ctx: undefined as AudioContext | undefined,
    osc: undefined as OscillatorNode | undefined,
@@ -23,6 +28,7 @@ const a = {
       osc: undefined as OscillatorNode | undefined,
       wid: undefined as GainNode | undefined,
    },
+   timbre: [] as Operator [],
 }
 
 const program = {
@@ -92,6 +98,27 @@ const update_graph = () => {
    a.vibrato.osc.frequency.setValueAtTime (a.vibrato.osc.frequency.value, t)
    a.vibrato.osc.frequency.exponentialRampToValueAtTime (vib_freq * vib_mul, t + lag_time)
 
+   let t_harm = harm
+
+   for (let i = 0; i < 6; i++) {
+      if (a.timbre[i].osc === undefined) return
+      a.timbre[i].osc!.frequency.cancelScheduledValues (t)
+      a.timbre[i].osc!.frequency.setValueAtTime (a.timbre[i].osc!.frequency.value, t)
+
+      const t_num = Math.floor (program.values[4] * 11 / 127) + 1 // [1, 12]
+      const t_den = Math.floor (program.values[12] * 11 / 127) + 1 // [1, 12]
+      const t_unity = program.values[20] / 128 // [0, 1)
+   
+      const [ t_num_array, t_den_array ] = siq_gen (t_num, t_den, t_unity)
+      t_harm = t_harm * rand_element (t_num_array) / rand_element (t_den_array)
+      while (t_harm > 16000) t_harm /= 2
+      a.timbre[i].osc!.frequency.exponentialRampToValueAtTime (t_harm, t + lag_time)
+
+      if (a.timbre[i].amp === undefined) return
+      a.timbre[i].amp!.gain.cancelScheduledValues (t)
+      a.timbre[i].amp!.gain.setValueAtTime (a.timbre[i].amp!.gain.value, t)
+      a.timbre[i].amp!.gain.linearRampToValueAtTime (t_harm / (i + 1), t + lag_time)
+   }
 
    if (a.tremolo.off === undefined ) return
    if (a.tremolo.wid === undefined) return
@@ -159,6 +186,29 @@ export default function Synth (props: {
       const wake_lock = await navigator.wakeLock.request (`screen`)
       wake_lock.onrelease = () => location.reload ()
 
+      a.timbre = Array (6).fill (0).map (() => {
+         if (!a.ctx) return { osc: undefined, amp: undefined }
+
+         const osc = a.ctx.createOscillator ()
+         osc.frequency.value = 8000 * Math.pow (2, random_bi ()) 
+         osc.start ()
+
+         const amp = a.ctx.createGain ()
+         amp.gain.value = 0
+
+         return { osc, amp }
+      })
+
+      a.timbre.forEach ((o, i) => {
+         if (!o.osc || !o.amp) return
+         o.osc.connect (o.amp)
+         if (i !== 0) {
+            if (!a.timbre[i - 1].osc) return
+            o.amp.connect (a.timbre[i - 1].osc!.frequency)
+            // o.amp.connect (a.ctx!.destination)
+         }
+      })
+
       a.osc = a.ctx.createOscillator ()
       a.osc.frequency.value = 40000
       a.osc.start ()
@@ -172,6 +222,9 @@ export default function Synth (props: {
 
       a.vibrato.osc.connect (a.vibrato.wid)
          .connect (a.osc.frequency)
+
+      if (!a.timbre[0].amp) return
+      a.timbre[0].amp.connect (a.osc.frequency)
 
       a.tremolo.osc = a.ctx.createOscillator ()
       a.tremolo.osc.frequency.value = 1
