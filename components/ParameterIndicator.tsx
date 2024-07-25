@@ -74,6 +74,47 @@ export function ParameterIndicator (props: {
       19: (v: number) => `vibrato rate: ${ (0.05 * Math.pow (320, v / 127)).toFixed (2) }`,
       27: (v: number) => `vibrato diversity: ${ (v / 127).toFixed (2) }`,
 
+      // timbre
+      12: (v: number) => {
+         const num_max = Math.floor (v * 11 / 127) + 1 
+         const den_max = Math.floor (values[12] * 11 / 127) + 1
+         const unity = values[17] / 128
+
+         const [ num, den ] = siq_gen (num_max, den_max, unity)
+
+         return <div>
+            timbre numerator:  { num_max }
+            <br />[ { num.join (`, `) } ] 
+            <br />[ { den.join (`, `) } ] 
+         </div>
+      },
+      20: (v: number) => {
+         const num_max = Math.floor (values[4] * 11 / 127) + 1 
+         const den_max = Math.floor (v * 11 / 127) + 1
+         const unity = values[17] / 128
+
+         const [ num, den ] = siq_gen (num_max, den_max, unity)
+
+         return <div>
+            timbre denominator: { den_max }
+            <br />[ { num.join (`, `) } ] 
+            <br />[ { den.join (`, `) } ] 
+         </div>
+      },
+      28: (v: number) => {      
+         const num_max = Math.floor (values[4] * 11 / 127) + 1 
+         const den_max = Math.floor (values[12] * 11 / 127) + 1
+         const unity = v / 128
+
+         const [ num, den ] = siq_gen (num_max, den_max, unity)
+
+         return <div>
+            timbre unity: { unity.toFixed (2) }
+            <br />[ { num.join (`, `) } ] 
+            <br />[ { den.join (`, `) } ] 
+         </div>
+      },
+
       // reverb
       // 14: (v: number) => `reverb feedback: ${ (v / 127).toFixed (2) }`,
       22: (v: number) => `reverb amount: ${ (v / 127).toFixed (2) }`,
