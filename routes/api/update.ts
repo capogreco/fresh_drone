@@ -9,10 +9,8 @@ export const handler: Handlers = {
       if (!ok) return new Response (`Failed to save program`, { status: 500 })
       program.versionstamp = versionstamp
       const bc = new BroadcastChannel (`program_channel`)
-      await bc.postMessage ({ program, versionstamp })
+      await bc.postMessage ({ type: `update`, program, versionstamp })
       bc.close ()
-
       return Response.json (versionstamp)
    }
-
 }

@@ -19,6 +19,7 @@ const param_control = signal (8)
 const param_value = signal (0)
 
 let param_change_id = 0
+let save_mode = false
 
 const update = () => {
    const payload = {
@@ -26,7 +27,6 @@ const update = () => {
       values: v.map (v => v.value)
    }
    const json = JSON.stringify (payload)
-   console.log (`updating: ${ json }`)
    fetch (`/api/update`, {
       method: `POST`,
       headers: {
@@ -50,6 +50,25 @@ const toggle_is_updating = () => {
 const toggle_is_playing = () => {
    is_playing.value = !is_playing.value
    update ()
+}
+
+const manage_bank = (key: string) => {
+   const values = v.map (v => v.value)
+   const type = save_mode ? `save` : `load`
+   console.log (`${ type } ${ key }`)
+   const payload = {
+      key: key,
+      values,
+      type,
+   }
+   const json = JSON.stringify (payload)
+   fetch (`/api/bank`, {
+      method: `POST`,
+      headers: {
+         "Content-Type": `application/json`
+      },
+      body: json
+   })
 }
 
 export default function Control () {
@@ -78,6 +97,17 @@ export default function Control () {
          const key_handler: { [ key: string ]: () => void } = {
             Enter: () => update (),
             p: () => toggle_is_playing (),
+            s: () => { save_mode = true },
+            0: () => manage_bank (e.key),
+            1: () => manage_bank (e.key),
+            2: () => manage_bank (e.key),
+            3: () => manage_bank (e.key),
+            4: () => manage_bank (e.key),
+            5: () => manage_bank (e.key),
+            6: () => manage_bank (e.key),
+            7: () => manage_bank (e.key),
+            8: () => manage_bank (e.key),
+            9: () => manage_bank (e.key),
          }
 
          let safe = false
@@ -90,6 +120,12 @@ export default function Control () {
          if (!safe) return
 
          key_handler[e.key] ()
+      }
+
+      globalThis.onkeyup = e => {
+         if (e.key === `s`) {
+            save_mode = false
+         }
       }
 
       const midi_handler = (e: MIDIMessageEvent) => {

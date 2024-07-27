@@ -2,6 +2,7 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $api_bank from "./routes/api/bank.ts";
 import * as $api_listen from "./routes/api/listen.ts";
 import * as $api_update from "./routes/api/update.ts";
 import * as $ctrl from "./routes/ctrl.tsx";
@@ -12,6 +13,7 @@ import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/api/bank.ts": $api_bank,
     "./routes/api/listen.ts": $api_listen,
     "./routes/api/update.ts": $api_update,
     "./routes/ctrl.tsx": $ctrl,

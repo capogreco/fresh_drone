@@ -11,8 +11,29 @@ export const handler: Handlers = {
             controller.enqueue (`retry: 1000\n\n`)
 
             bc.onmessage = e => {
-               const { program } = e.data
-               controller.enqueue (`data: ${ JSON.stringify (program) }\n\n`)
+               // console.log(e)
+
+               const handle: { [key: string]: () => void } = {
+                  update () {
+                     const { program } = e.data
+                     program.type = `update`
+                     controller.enqueue (`data: ${ JSON.stringify (program) }\n\n`)
+                  },
+                  load () {
+                     // console.log (`load`, e.data)
+                     controller.enqueue (`data: ${ JSON.stringify (e.data) }\n\n`)
+                  },
+                  save () {
+                     // console.log (`save`, e.data)
+                     controller.enqueue (`data: ${ JSON.stringify (e.data) }\n\n`)
+                  }
+               }
+
+               handle[e.data.type] ()
+
+               // const { program } = e.data
+               // console.log (program)
+               // controller.enqueue (`data: ${ JSON.stringify (program) }\n\n`)
             }
 
             async function queue_update () {
@@ -23,7 +44,7 @@ export const handler: Handlers = {
                }
                
                finally {
-                  timer_id = setTimeout (queue_update, 10000)
+                  // timer_id = setTimeout (queue_update, 10000)
                }
             }
             await queue_update ()

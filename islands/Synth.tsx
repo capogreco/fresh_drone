@@ -12,6 +12,8 @@ interface Operator {
    amp: GainNode | undefined
 }
 
+const bank = Array (10).fill (false)
+
 const a = {
    ctx: undefined as AudioContext | undefined,
    osc: undefined as OscillatorNode | undefined,
@@ -29,6 +31,78 @@ const a = {
       wid: undefined as GainNode | undefined,
    },
    timbre: [] as Operator [],
+}
+
+const save_graph = (key: string) => {
+   const timbre = a.timbre.map (o => {
+      if (!o.osc || !o.amp) return { freq: 0, amp: 0 }
+      return { freq: o.osc.frequency.value, amp: o.amp.gain.value }
+   })
+   const graph_values = {
+      freq: a.osc!.frequency.value,
+      amp: a.amp!.gain.value,
+      rev: a.wet!.gain.value,
+      trem_freq: a.tremolo.osc!.frequency.value,
+      trem_wid: a.tremolo.wid!.gain.value,
+      trem_off: a.tremolo.off!.offset.value,
+      vib_freq: a.vibrato.osc!.frequency.value,
+      vib_wid: a.vibrato.wid!.gain.value,
+      timbre,
+   }
+   bank[Number (key)] = graph_values
+}
+
+const load_graph = (key: string, lag_time: number) => {
+   const graph_values = bank[Number (key)]
+   if (!graph_values) return
+   if (!a.ctx) return
+
+   const t = a.ctx.currentTime
+
+   a.amp!.gain.cancelScheduledValues (t)
+   a.amp!.gain.setValueAtTime (a.amp!.gain.value, t)
+   a.amp!.gain.linearRampToValueAtTime (graph_values.amp, t + lag_time)
+
+   a.osc!.frequency.cancelScheduledValues (t)
+   a.osc!.frequency.setValueAtTime (a.osc!.frequency.value, t)
+   a.osc!.frequency.exponentialRampToValueAtTime (graph_values.freq, t + lag_time)
+
+   a.wet!.gain.cancelScheduledValues (t)
+   a.wet!.gain.setValueAtTime (a.wet!.gain.value, t)
+   a.wet!.gain.linearRampToValueAtTime (graph_values.rev, t + lag_time)
+
+   a.tremolo.osc!.frequency.cancelScheduledValues (t)
+   a.tremolo.osc!.frequency.setValueAtTime (a.tremolo.osc!.frequency.value, t)
+   a.tremolo.osc!.frequency.exponentialRampToValueAtTime (graph_values.trem_freq, t + lag_time)
+
+
+   a.tremolo.wid!.gain.cancelScheduledValues (t)
+   a.tremolo.wid!.gain.setValueAtTime (a.tremolo.wid!.gain.value, t)
+   a.tremolo.wid!.gain.linearRampToValueAtTime (graph_values.trem_wid, t + lag_time)
+
+   a.tremolo.off!.offset.cancelScheduledValues (t)
+   a.tremolo.off!.offset.setValueAtTime (a.tremolo.off!.offset.value, t)
+   a.tremolo.off!.offset.linearRampToValueAtTime (graph_values.trem_off, t + lag_time)
+
+   a.vibrato.osc!.frequency.cancelScheduledValues (t)
+   a.vibrato.osc!.frequency.setValueAtTime (a.vibrato.osc!.frequency.value, t)
+   a.vibrato.osc!.frequency.exponentialRampToValueAtTime (graph_values.vib_freq, t + lag_time)
+
+   a.vibrato.wid!.gain.cancelScheduledValues (t)
+   a.vibrato.wid!.gain.setValueAtTime (a.vibrato.wid!.gain.value, t)
+   a.vibrato.wid!.gain.linearRampToValueAtTime (graph_values.vib_wid, t + lag_time)
+
+   graph_values.timbre.forEach ((o: { freq: number, amp: number }, i: number) => {
+      if (!a.timbre[i].osc || !a.timbre[i].amp) return
+      a.timbre[i].osc!.frequency.cancelScheduledValues (t)
+      a.timbre[i].osc!.frequency.setValueAtTime (a.timbre[i].osc!.frequency.value, t)
+      a.timbre[i].osc!.frequency.exponentialRampToValueAtTime (o.freq, t + lag_time)
+
+      a.timbre[i].amp!.gain.cancelScheduledValues (t)
+      a.timbre[i].amp!.gain.setValueAtTime (a.timbre[i].amp!.gain.value, t)
+      a.timbre[i].amp!.gain.linearRampToValueAtTime (o.amp, t + lag_time)
+   })
+
 }
 
 const program = {
@@ -174,12 +248,38 @@ export default function Synth (props: {
 
       const es = new EventSource (`/api/listen`)
       es.onmessage = e => {
-         const data = JSON.parse (e.data)
-         if (program.versionstamp === `init` 
-            || data.versionstamp > program.versionstamp) {
-            Object.assign (program, data)
-            update_graph ()
+
+         const msg = JSON.parse (e.data)
+         const handle: { [key: string]: () => void } = {
+            update: () => {
+               const new_program = msg
+               if (program.versionstamp === `init` 
+                  || new_program.versionstamp > program.versionstamp) {
+                  Object.assign (program, new_program)
+                  update_graph ()
+               }
+            },
+            load: () => {
+               const { values } = msg.program
+               const lag_diversity = values[23] / 127
+               const lag = Math.pow (values[15] / 127, 3) * 40
+               const lag_time = lag * Math.pow (2, lag_diversity * random_bi ())
+            
+               if (enabled.value) load_graph (msg.key, lag_time)
+            },
+            save: () => {
+               if (enabled.value) save_graph (msg.key)
+            }
          }
+
+         handle[msg.type] ()
+
+         // const data = JSON.parse (e.data)
+         // if (program.versionstamp === `init` 
+         //    || data.versionstamp > program.versionstamp) {
+         //    Object.assign (program, data)
+         //    update_graph ()
+         // }
       }
    }, [])
 
@@ -215,7 +315,7 @@ export default function Synth (props: {
       })
 
       a.osc = a.ctx.createOscillator ()
-      a.osc.frequency.value = 40000
+      a.osc.frequency.value = 8000 * Math.pow (2, random_bi ()) 
       a.osc.start ()
 
       a.vibrato.osc = a.ctx.createOscillator ()
