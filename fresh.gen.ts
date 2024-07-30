@@ -7,7 +7,10 @@ import * as $api_listen from "./routes/api/listen.ts";
 import * as $api_update from "./routes/api/update.ts";
 import * as $ctrl from "./routes/ctrl.tsx";
 import * as $index from "./routes/index.tsx";
+import * as $six_synths from "./routes/six-synths.tsx";
 import * as $Control from "./islands/Control.tsx";
+import * as $Receiver from "./islands/Receiver.tsx";
+import * as $SixSynth from "./islands/SixSynth.tsx";
 import * as $Synth from "./islands/Synth.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
@@ -18,9 +21,12 @@ const manifest = {
     "./routes/api/update.ts": $api_update,
     "./routes/ctrl.tsx": $ctrl,
     "./routes/index.tsx": $index,
+    "./routes/six-synths.tsx": $six_synths,
   },
   islands: {
     "./islands/Control.tsx": $Control,
+    "./islands/Receiver.tsx": $Receiver,
+    "./islands/SixSynth.tsx": $SixSynth,
     "./islands/Synth.tsx": $Synth,
   },
   baseUrl: import.meta.url,

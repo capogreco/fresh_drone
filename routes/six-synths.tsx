@@ -12,6 +12,6 @@ export const handler: Handlers = {
 
 export default function SynthClient (props: PageProps<Program>) {
    return (
-      <Receiver enabled={ false } program={ props.data } size={ 1 } />
+      <Receiver enabled={ false } program={ props.data } size={ 6 } />
    )
 }
