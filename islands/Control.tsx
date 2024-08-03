@@ -54,6 +54,7 @@ const toggle_is_playing = () => {
 
 const manage_bank = (key: string) => {
    const values = v.map (v => v.value)
+   console.dir (values[15])
    const type = save_mode ? `save` : `load`
    console.log (`${ type } ${ key }`)
    const payload = {

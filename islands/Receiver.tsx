@@ -5,6 +5,17 @@ import { SynthSplash } from "../components/SynthSplash.tsx"
 import Synth from "./Synth.tsx";
 import { Program } from "../shared/types.ts";
 
+interface MsgType {
+   is_playing: boolean;
+   type: string;
+   values: number[];
+   versionstamp: string;
+   program: {
+     values: number[];
+   };
+   key: string;
+ }
+
 let a: AudioContext
 
 export default function Reciever (props: {
@@ -22,29 +33,38 @@ export default function Reciever (props: {
 
    const enable = async () => {
       await a.resume ()
-      console.log (`enabling:`, a)
       enabled.value = true
    }
 
-   const msg = useSignal ({
+   const msg = useSignal<MsgType> ({
       is_playing: false,
       type: `update`,
       values: Array.from ({ length: 24 }, () => 0),
       versionstamp: `init`,
+      program: {
+         values: Array.from ({ length: 24 }, () => 0),
+      },
       key: ``,
    })
+
 
    useEffect (() => {
  
       const es = new EventSource (`/api/listen`)
       es.onmessage = e => {
          msg.value = JSON.parse (e.data)
+         if (msg.value.type === `load`) {
+            program.values = msg.value.values
+         }
+
       }
 
    }, [])
 
    if (enabled.value) {
       const synth_array = Array.from ({ length: size }, (_, i) => {
+         // console.dir (program.values[15])
+         // console.dir (program)
          return <Synth 
             enabled={ true } 
             program={ program } 

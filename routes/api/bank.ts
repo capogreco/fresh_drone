@@ -5,7 +5,6 @@ const db = await Deno.openKv ()
 export const handler: Handlers = {
    async POST (req) {
       const program = await req.json ()
-
       const handle: any = {
          async save () {
             const { ok } = await db.set ([ `bank`, program.key ], program)
@@ -18,7 +17,7 @@ export const handler: Handlers = {
             const old_program = await db.get ([ `bank`, program.key ])
             if (!old_program) return new Response (`Failed to load program`, { status: 500 })
             const bc = new BroadcastChannel (`program_channel`)
-            await bc.postMessage ({ type: `load`, key: program.key, program, old_program })
+            await bc.postMessage ({ ... program, old_program })
             bc.close ()
          }
       }

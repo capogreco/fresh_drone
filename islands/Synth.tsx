@@ -24,8 +24,6 @@ const rand_element = (array: number []) => {
    return array[Math.floor (Math.random () * array.length)]
 }
 
-const a_array: any[] = []
-
 interface SynthProps {
    enabled: boolean;
    program: Program;
@@ -185,8 +183,6 @@ export default class Synth extends Component<SynthProps> {
    update_graph = async () => {
       const { voices, program } = this.props
 
-      console.log (`voice ${ voices.index } is updating`)
-
       const g = this.a
 
       const lag_diversity = program.values[23] / 127
@@ -222,7 +218,6 @@ export default class Synth extends Component<SynthProps> {
       const harm = freq * rand_element (num_array) / rand_element (den_array)
       g.osc.frequency.exponentialRampToValueAtTime (harm, t + lag_time)
    
-      console.log (`voice ${ voices.index } is playing at ${ g.osc.frequency.value } Hz`)
       if (g.pan === undefined) return
    
       if (g.vibrato.wid === undefined) return
@@ -289,7 +284,6 @@ export default class Synth extends Component<SynthProps> {
       g.tremolo.osc.frequency.exponentialRampToValueAtTime (trem_freq * trem_mul, t + lag_time)
    
       const vol = program.values[7] / (127 * voices.total)
-      console.log (`voice ${ voices.index } is playing at volume`, vol)
       g.amp.gain.cancelScheduledValues (t)
       g.amp.gain.setValueAtTime (g.amp.gain.value, t)
       g.amp.gain.linearRampToValueAtTime (vol, t + lag_time)
@@ -302,6 +296,7 @@ export default class Synth extends Component<SynthProps> {
       g.wet.gain.cancelScheduledValues (t)
       g.wet.gain.setValueAtTime (g.wet.gain.value, t)
       g.wet.gain.linearRampToValueAtTime (rev_vol, t + lag_time)
+
    }   
 
    init_audio = async () => {
@@ -367,10 +362,9 @@ export default class Synth extends Component<SynthProps> {
 
       this.a.pan = this.a.ctx.createStereoPanner ()
       if (voices.total === 1) {
-         a.pan.pan.value = 0
+         this.a.pan.pan.value = 0
       } else {
          const pan_val = (voices.index / (voices.total - 1)) * 2 - 1
-         console.log (`${ voices.index } panning to`, pan_val)
          this.a.pan.pan.value = pan_val
       }
    
@@ -378,6 +372,7 @@ export default class Synth extends Component<SynthProps> {
       this.a.amp.gain.value = 0
       this.a.osc.connect (this.a.tremolo.amp)
          .connect (this.a.amp)
+         .connect (this.a.pan)
          .connect (this.a.ctx.destination)
 
       this.a.rev = this.a.ctx.createConvolver ()
@@ -403,10 +398,10 @@ export default class Synth extends Component<SynthProps> {
    }
 
    componentDidUpdate = () => {
-      const { msg, voices, program } = this.props
-      console.dir (msg)
+      const { msg, program } = this.props
       const handle: { [key: string]: () => void } = {
          update: () => {
+            console.log (`updating`)
             const new_program = msg
             // console.log (props.voices.index, program.versionstamp, new_program.versionstamp)
             // if (program.versionstamp === `init` 
@@ -416,7 +411,6 @@ export default class Synth extends Component<SynthProps> {
             //    update_graph ()
             // }
 
-            console.log (voices.index, `updating`)
             Object.assign (program, new_program)
             this.update_graph ()
          },
@@ -425,7 +419,7 @@ export default class Synth extends Component<SynthProps> {
             const lag_diversity = values[23] / 127
             const lag = Math.pow (values[15] / 127, 3) * 40
             const lag_time = lag * Math.pow (2, lag_diversity * random_bi ())
-         
+            console.log (`loading with lag time: ${ lag_time }s`)
             this.load_graph (msg.key, lag_time)
          },
          save: () => {
